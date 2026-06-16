@@ -12,37 +12,393 @@
             height: 100%;
             background-color: #000;
             overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
         canvas {
             display: block;
             outline: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .control-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(20, 20, 30, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            width: 320px;
+            color: #fff;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+        .control-panel h2 {
+            margin: 0 0 16px 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #aaa;
+        }
+        .form-group select,
+        .form-group input[type="range"],
+        .form-group input[type="number"] {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .form-group select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .form-group select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .slider-container input[type="range"] {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            outline: none;
+        }
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #6366f1;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .slider-container input[type="range"]::-webkit-slider-thumb:hover {
+            background: #818cf8;
+        }
+        .slider-container input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #6366f1;
+            cursor: pointer;
+            border: none;
+        }
+        .slider-container .value-display {
+            min-width: 60px;
+            text-align: right;
+            font-size: 13px;
+            color: #6366f1;
+            font-weight: 500;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        button {
+            flex: 1;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button.secondary {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        button.secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: none;
+        }
+        .error-message {
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 6px;
+            color: #fca5a5;
+            font-size: 12px;
+            display: none;
+        }
+        .error-message.show {
+            display: block;
+        }
+        .error-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #f87171;
+        }
+        .type-desc {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+        .toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 360px;
+            background: rgba(20, 20, 30, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: #fff;
+            cursor: pointer;
+            z-index: 101;
+            font-size: 13px;
+        }
+        .toggle-btn:hover {
+            background: rgba(40, 40, 60, 0.9);
+        }
+        .control-panel.hidden {
+            transform: translateX(400px);
+        }
+        .control-panel {
+            transition: transform 0.3s ease;
         }
     </style>
 </head>
 <body>
     <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+
+    <button class="toggle-btn" id="toggleBtn">⚙️ 设置</button>
+
+    <div class="control-panel" id="controlPanel">
+        <h2>🎆 烟花效果设置</h2>
+
+        <div class="form-group">
+            <label for="fireworkType">烟花类型</label>
+            <select id="fireworkType">
+                <option value="0">🌼 菊花 (Chrysanthemum)</option>
+                <option value="1">🌿 柳枝 (Willow)</option>
+                <option value="2">💍 环形 (Ring)</option>
+                <option value="3">⛲ 喷泉 (Fountain)</option>
+                <option value="4">📿 连珠 (Pearl Chain)</option>
+            </select>
+            <div class="type-desc" id="typeDesc">经典球形爆炸，粒子均匀向四周扩散</div>
+        </div>
+
+        <div class="form-group">
+            <label for="particleCount">粒子数量 <span style="color:#666">(10-500)</span></label>
+            <div class="slider-container">
+                <input type="range" id="particleCount" min="10" max="500" value="150" step="10">
+                <span class="value-display" id="particleCountValue">150</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="explosionRadius">爆炸半径 <span style="color:#666">(1.0-15.0)</span></label>
+            <div class="slider-container">
+                <input type="range" id="explosionRadius" min="10" max="150" value="60" step="1">
+                <span class="value-display" id="explosionRadiusValue">6.0</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="life">粒子寿命 <span style="color:#666">(20.0-200.0)</span></label>
+            <div class="slider-container">
+                <input type="range" id="life" min="20" max="200" value="60" step="1">
+                <span class="value-display" id="lifeValue">60.0</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="colorVariation">颜色变化 <span style="color:#666">(0-180)</span></label>
+            <div class="slider-container">
+                <input type="range" id="colorVariation" min="0" max="180" value="30" step="1">
+                <span class="value-display" id="colorVariationValue">30</span>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="applyBtn">应用设置</button>
+            <button id="resetBtn" class="secondary">重置默认</button>
+        </div>
+
+        <div class="button-group">
+            <button id="typeDefaultBtn" class="secondary">使用该类型默认值</button>
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            <div class="error-title">⚠️ 参数错误</div>
+            <div id="errorText"></div>
+        </div>
+    </div>
+
     <script>
+        const typeDescriptions = {
+            0: "经典球形爆炸，粒子均匀向四周扩散，色彩饱满",
+            1: "粒子受更强重力影响向下垂落，形成柳枝般的优美弧线",
+            2: "粒子均匀分布在圆环上，形成完美的环形图案",
+            3: "粒子集中向上喷射，如水柱般的效果",
+            4: "分三次连续爆炸，每次范围更大、颜色不同"
+        };
+
+        const typeDefaults = {
+            0: { particleCount: 150, explosionRadius: 60, life: 60, colorVariation: 30 },
+            1: { particleCount: 200, explosionRadius: 40, life: 120, colorVariation: 15 },
+            2: { particleCount: 100, explosionRadius: 70, life: 50, colorVariation: 0 },
+            3: { particleCount: 80, explosionRadius: 30, life: 80, colorVariation: 45 },
+            4: { particleCount: 60, explosionRadius: 50, life: 70, colorVariation: 60 }
+        };
+
         var Module = {
             canvas: (function() {
                 var canvas = document.getElementById('canvas');
-                // Make canvas full screen
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
                 return canvas;
             })(),
             onRuntimeInitialized: function() {
                 console.log("烟花C模块已加载");
+                initControls();
+                syncFromC();
             }
         };
-        
-        window.addEventListener('resize', function() {
-            var canvas = document.getElementById('canvas');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
+
+        function initControls() {
+            const typeSelect = document.getElementById('fireworkType');
+            const particleCount = document.getElementById('particleCount');
+            const explosionRadius = document.getElementById('explosionRadius');
+            const life = document.getElementById('life');
+            const colorVariation = document.getElementById('colorVariation');
+            const applyBtn = document.getElementById('applyBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const typeDefaultBtn = document.getElementById('typeDefaultBtn');
+            const toggleBtn = document.getElementById('toggleBtn');
+            const controlPanel = document.getElementById('controlPanel');
+
+            typeSelect.addEventListener('change', function() {
+                document.getElementById('typeDesc').textContent = typeDescriptions[this.value];
+            });
+
+            particleCount.addEventListener('input', function() {
+                document.getElementById('particleCountValue').textContent = this.value;
+            });
+
+            explosionRadius.addEventListener('input', function() {
+                document.getElementById('explosionRadiusValue').textContent = (this.value / 10).toFixed(1);
+            });
+
+            life.addEventListener('input', function() {
+                document.getElementById('lifeValue').textContent = this.value + '.0';
+            });
+
+            colorVariation.addEventListener('input', function() {
+                document.getElementById('colorVariationValue').textContent = this.value;
+            });
+
+            applyBtn.addEventListener('click', applyConfig);
+            resetBtn.addEventListener('click', resetToDefaults);
+            typeDefaultBtn.addEventListener('click', useTypeDefaults);
+
+            toggleBtn.addEventListener('click', function() {
+                controlPanel.classList.toggle('hidden');
+                toggleBtn.textContent = controlPanel.classList.contains('hidden') ? '⚙️ 显示设置' : '⚙️ 设置';
+            });
+
+            window.addEventListener('resize', function() {
+                var canvas = document.getElementById('canvas');
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
+
+        function syncFromC() {
+            const type = Module._get_current_type();
+            const particleCount = Module._get_current_particle_count();
+            const explosionRadius = Math.round(Module._get_current_explosion_radius() * 10);
+            const life = Math.round(Module._get_current_life());
+            const colorVariation = Module._get_current_color_variation();
+
+            document.getElementById('fireworkType').value = type;
+            document.getElementById('typeDesc').textContent = typeDescriptions[type];
+            document.getElementById('particleCount').value = particleCount;
+            document.getElementById('particleCountValue').textContent = particleCount;
+            document.getElementById('explosionRadius').value = explosionRadius;
+            document.getElementById('explosionRadiusValue').textContent = (explosionRadius / 10).toFixed(1);
+            document.getElementById('life').value = life;
+            document.getElementById('lifeValue').textContent = life + '.0';
+            document.getElementById('colorVariation').value = colorVariation;
+            document.getElementById('colorVariationValue').textContent = colorVariation;
+        }
+
+        function applyConfig() {
+            const type = parseInt(document.getElementById('fireworkType').value);
+            const particleCount = parseInt(document.getElementById('particleCount').value);
+            const explosionRadius = parseFloat(document.getElementById('explosionRadius').value) / 10.0;
+            const life = parseFloat(document.getElementById('life').value);
+            const colorVariation = parseInt(document.getElementById('colorVariation').value);
+
+            const hasError = Module._set_firework_config(type, particleCount, explosionRadius, life, colorVariation);
+
+            if (hasError) {
+                const errorPtr = Module._get_last_error();
+                const errorStr = Module.UTF8ToString(errorPtr);
+                showError(errorStr);
+                syncFromC();
+            } else {
+                hideError();
+            }
+        }
+
+        function resetToDefaults() {
+            Module._reset_to_defaults();
+            hideError();
+            syncFromC();
+        }
+
+        function useTypeDefaults() {
+            const type = parseInt(document.getElementById('fireworkType').value);
+            Module._use_type_defaults(type);
+            hideError();
+            syncFromC();
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorDiv.classList.add('show');
+        }
+
+        function hideError() {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.classList.remove('show');
+        }
     </script>
     <script src="fireworks.js"></script>
 </body>

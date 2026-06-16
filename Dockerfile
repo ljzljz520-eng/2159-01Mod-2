@@ -18,6 +18,7 @@ RUN emcc fireworks.c \
     -s USE_SDL=2 \
     -s WASM=1 \
     -s ALLOW_MEMORY_GROWTH=1 \
+    -s EXTRA_EXPORTED_RUNTIME_METHODS=['UTF8ToString','stringToUTF8','lengthBytesUTF8'] \
     -O3 \
     -o public/fireworks.js
 
